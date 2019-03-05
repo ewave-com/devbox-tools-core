@@ -1,0 +1,28 @@
+services:
+    _defaults:
+        autowire: true
+
+    Symfony\Component\Console\Application:
+        class: Symfony\Component\Console\Application
+        public: true
+
+    CoreDevBoxScripts\Library\:
+        resource: './Library/*'
+        public: true
+
+    CoreDevBoxScripts\Framework\:
+        resource: './Framework/*'
+        public: true
+
+    CoreDevBoxScripts\Framework\Downloader\DownloaderFactory:
+        class: CoreDevBoxScripts\Framework\Downloader\DownloaderFactory
+        public: true
+        arguments:
+          - {
+              vcs: '@CoreDevBoxScripts\Framework\Downloader\Vcs',
+              http: '@CoreDevBoxScripts\Framework\Downloader\Http',
+              owncloud: '@CoreDevBoxScripts\Framework\Downloader\Http',
+              sftp: '@CoreDevBoxScripts\Framework\Downloader\Sftp',
+              ftp: '@CoreDevBoxScripts\Framework\Downloader\Ftp',
+              local_storage: '@CoreDevBoxScripts\Framework\Downloader\Local'
+            }

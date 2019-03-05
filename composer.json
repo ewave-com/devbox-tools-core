@@ -1,0 +1,21 @@
+{
+    "name": "ewave/devbox-core-scripts",
+    "description": "Core Scripts to help setup and install web application into developer's containers",
+    "type": "library",
+    "version": "1.0.0",
+    "require": {
+        "symfony/console": "^3.1",
+        "symfony/config": "^3.4",
+        "symfony/yaml": "^3.4",
+        "symfony/dependency-injection": "^3.4",
+        "phpseclib/phpseclib": "^2.0"
+    },
+    "autoload": {
+      "files": [ "registration.php" ],
+      "psr-4": {
+        "CoreDevBoxScripts\\": ""
+      }
+    },
+    "license": "OSL-3.0",
+    "minimum-stability": "beta"
+}
