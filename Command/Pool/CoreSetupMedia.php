@@ -73,7 +73,7 @@ class CoreSetupMedia extends CommandAbstract
             ['Media Source', $source],
             ['Media Branch', $sourceBranch],
             ['Temp folder', $destinationPath],
-            ['Project Media Folder', $destinationPath],
+            ['Project Media Folder', $destinationMediaPath],
         ];
         $io->table($headers, $rows);
 
@@ -100,11 +100,27 @@ class CoreSetupMedia extends CommandAbstract
         $downloaderFactory = Container::getContainer()->get(DownloaderFactory::class);
 
         try {
+
+            if ($sourceType != 'vcs') {
+                $destinationPath = $destinationPath . DIRECTORY_SEPARATOR . basename($source);
+            }
+
             $downloader = $downloaderFactory->get($sourceType);
             $downloader->download($source, $destinationPath, $downloadOptions, $output);
         } catch (\Exception $e) {
             $io->warning([$e->getMessage()]);
             $io->warning('Some issues appeared during media update');
+            return false;
+        }
+
+        try {
+            $newPath = $this->unGz($destinationPath, $output);
+            if (!is_file($newPath) && !is_dir($newPath)) {
+                throw new \Exception('File is not exists. Path: ' . $newPath);
+            }
+            $destinationPath = $newPath;
+        } catch (\Exception $e) {
+            $io->note($e->getMessage());
             return false;
         }
 

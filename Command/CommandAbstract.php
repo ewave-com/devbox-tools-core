@@ -12,6 +12,7 @@ use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use CoreDevBoxScripts\Library\Directory;
 
 /**
  * Abstract command for all devbox commands
@@ -29,10 +30,10 @@ abstract class CommandAbstract extends CoreCommandAbstract
     protected $questionOnRepeat = 'Do you want to Continue?';
 
     /**
-     * @param string          $method
-     * @param InputInterface  $input
+     * @param string $method
+     * @param InputInterface $input
      * @param OutputInterface $output
-     * @param array           ...$params
+     * @param array ...$params
      * @return void
      */
     protected function executeRepeatedly($method, InputInterface $input, OutputInterface $output, ...$params)
@@ -63,7 +64,7 @@ abstract class CommandAbstract extends CoreCommandAbstract
     }
 
     /**
-     * @param array|string         $commands
+     * @param array|string $commands
      * @param OutputInterface|null $output
      * @throws \Exception
      * @return void
@@ -75,7 +76,7 @@ abstract class CommandAbstract extends CoreCommandAbstract
 
     /**
      * @param SymfonyStyle $io
-     * @param string       $title
+     * @param string $title
      * @return bool
      */
     protected function commandTitle($io, $title)
@@ -87,8 +88,8 @@ abstract class CommandAbstract extends CoreCommandAbstract
     /**
      * Execute wrapped commands
      *
-     * @param array|string    $commandNames
-     * @param InputInterface  $input
+     * @param array|string $commandNames
+     * @param InputInterface $input
      * @param OutputInterface $output
      * @return void
      * @throws CommandNotFoundException
@@ -104,8 +105,8 @@ abstract class CommandAbstract extends CoreCommandAbstract
     /**
      * Execute wrapped command
      *
-     * @param string          $commandName
-     * @param InputInterface  $input
+     * @param string $commandName
+     * @param InputInterface $input
      * @param OutputInterface $output
      * @return void
      * @throws CommandNotFoundException
@@ -151,7 +152,7 @@ abstract class CommandAbstract extends CoreCommandAbstract
     }
 
     /**
-     * @param string          $filePath
+     * @param string $filePath
      * @param OutputInterface $output
      * @return string
      */
@@ -162,7 +163,7 @@ abstract class CommandAbstract extends CoreCommandAbstract
 
         if ($path_parts['extension'] == 'gz') {
             $command = "gunzip " . $filePath;
-            $output->writeln('<comment>Unpacking file...</comment>');
+            $output->writeln('<comment>[GZ] Unpacking file...</comment>');
             $this->executeCommands(
                 $command,
                 $output
@@ -171,11 +172,53 @@ abstract class CommandAbstract extends CoreCommandAbstract
             $output->writeln("<info>Extracted file: $newPath </info>");
         }
 
+        $newPath = $this->unTar($newPath, $output);
+
         return $newPath;
     }
 
     /**
-     * @param string               $directory
+     * @param string $filePath
+     * @param OutputInterface $output
+     * @return string
+     */
+    public function unTar($filePath, $output)
+    {
+        $path_parts = pathinfo($filePath);
+        $newPath = $filePath;
+
+        if ($path_parts['extension'] == 'tar') {
+
+            $extractedPath = $path_parts['dirname'] . DIRECTORY_SEPARATOR . 'extracted';
+
+            if (!is_dir($extractedPath)) {
+                $this->mkdir($extractedPath);
+            }
+
+            if (!Directory::isEmptyDir($extractedPath) && $extractedPath) {
+                $command = "rm -fr $extractedPath/*";
+
+                $this->executeCommands(
+                    $command,
+                    $output
+                );
+            }
+
+            $command = "tar -C " . $extractedPath . " -xvf $filePath";
+            $output->writeln('<comment>[TAR] Unpacking file...</comment>');
+            $this->executeCommands(
+                $command,
+                $output
+            );
+            $output->writeln("<info>Extracted to : $extractedPath </info>");
+            $newPath = $extractedPath;
+        }
+
+        return $newPath;
+    }
+
+    /**
+     * @param string $directory
      * @param OutputInterface|null $output
      * @throws \Exception
      */
