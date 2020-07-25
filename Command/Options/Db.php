@@ -47,6 +47,11 @@ class Db extends AbstractOptions
     const NAME = 'db-name';
 
     /**
+     * string
+     */
+    const UPDATE_DB_DATA = 'update-db-data';
+
+    /**
      * {@inheritdoc}
      */
     protected static function getOptions()
@@ -82,6 +87,12 @@ class Db extends AbstractOptions
                 'default' => 'core2',
                 'description' => 'Mysql database',
                 'question' => 'Please enter Mysql database %default%'
+            ],
+            static::UPDATE_DB_DATA => [
+                'boolean' => true,
+                'description' => 'Do you want to update Database records?',
+                'question' => 'Do you want to update DB values according to config? %default%',
+                'default' => 'yes'
             ]
         ];
     }
