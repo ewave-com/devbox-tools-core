@@ -41,7 +41,7 @@ class CoreSetupNodeModules extends CommandAbstract
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $destinationPath = EnvConfig::getValue('WEBSITE_DOCUMENT_ROOT');
+        $destinationPath = EnvConfig::getValue('WEBSITE_APPLICATION_ROOT') ?: EnvConfig::getValue('WEBSITE_DOCUMENT_ROOT');
         $io = new SymfonyStyle($input, $output);
 
         $packageManager = JsonConfig::getConfig(
@@ -57,7 +57,7 @@ class CoreSetupNodeModules extends CommandAbstract
         );
 
         if ($useSymlink) {
-            $command = "sudo ln -nfs /var/www/node_modules_remote $destinationPath/node_modules";
+            $command = "mkdir -p /var/www/node_modules_remote && ln -nfs /var/www/node_modules_remote $destinationPath/node_modules";
             $this->executeCommands(
                 $command,
                 $output
@@ -70,7 +70,7 @@ class CoreSetupNodeModules extends CommandAbstract
 
         if ($operation) {
             $checkPackageFileCommand = "test -e $destinationPath/package.json";
-            $installCommand = sprintf("cd $destinationPath && sudo %s install", $packageManager);
+            $installCommand = sprintf("cd $destinationPath && %s install --force", $packageManager);
             $createPackageFileCommand = "cp $destinationPath/package.json.sample $destinationPath/package.json";
             $command = "$checkPackageFileCommand && $installCommand || $createPackageFileCommand && $installCommand";
             $this->executeCommands(

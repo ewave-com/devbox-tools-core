@@ -66,7 +66,7 @@ class CoreSetupCode extends CommandAbstract
      */
     protected function copyFromGit(InputInterface $input, OutputInterface $output, SymfonyStyle $io)
     {
-        $destinationPath = EnvConfig::getValue('WEBSITE_DOCUMENT_ROOT');
+        $destinationPath = EnvConfig::getValue('WEBSITE_APPLICATION_ROOT') ?: EnvConfig::getValue('WEBSITE_DOCUMENT_ROOT');
         $sourceType = JsonConfig::getConfig('sources->code->source_type');
         $sourcePath = JsonConfig::getConfig('sources->code->source_path');
         $defaultBranch = JsonConfig::getConfig('sources->code->source_branch');
