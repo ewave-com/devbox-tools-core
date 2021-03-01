@@ -97,6 +97,7 @@ class CoreRemoteFilesMapping extends CommandAbstract
 
         /** @var DownloaderFactory $downloaderFactory */
         $downloaderFactory = Container::getContainer()->get(DownloaderFactory::class);
+        $applicationRoot = EnvConfig::getValue('WEBSITE_APPLICATION_ROOT') ?: EnvConfig::getValue('WEBSITE_DOCUMENT_ROOT');
 
         try {
             $downloader = $downloaderFactory->get($sourceType);
@@ -117,8 +118,16 @@ class CoreRemoteFilesMapping extends CommandAbstract
 
         foreach ($mapping as $sourceFile => $localFile) {
             $sourceTempFile = $destinationPath . DIRECTORY_SEPARATOR . $sourceFile;
-            $command = "cp $sourceTempFile $localFile";
+            if ('/' !== substr($localFile, 0, 1)) {
+                $localFile = $applicationRoot . '/' . $localFile; // transform to absolute path
+            }
+
+            if (!is_dir(dirname($localFile))) {
+                $this->mkdir(dirname($localFile), $output);
+            }
+
             $output->writeln('Copying file ' . $sourceTempFile . ' to ' . $localFile);
+            $command = "cp $sourceTempFile $localFile";
 
             try {
                 $this->executeCommands(

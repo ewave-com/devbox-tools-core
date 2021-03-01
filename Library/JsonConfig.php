@@ -32,7 +32,7 @@ class JsonConfig
         $jsonConfig = json_decode($jsonContent, true);
 
         if ($jsonConfig === null && json_last_error() !== JSON_ERROR_NONE) {
-            throw new \Exception('Project configuration file is incorrect, check ' . $jsonFile . ' file');
+            throw new \Exception('Project configuration file is incorrect, check ' . $jsonFile . ' file. Error code: ' . json_last_error() . ', error message: ' . json_last_error_msg());
         }
 
         if ($name) {
@@ -75,13 +75,8 @@ class JsonConfig
                     return $result;
                 }
             } else {
-                if ($default) {
-                    $result = $default;
-                    return $result;
-                } else {
-                    $result = $array;
-                    return $result;
-                }
+                $result = $default;
+                return $result;
             }
         } else {
             return false;
