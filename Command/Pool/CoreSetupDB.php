@@ -66,6 +66,21 @@ class CoreSetupDb extends CommandAbstract
         $localDumpsStorage = JsonConfig::getConfig('sources->db->local_temp_path');
         $downloadOptions = JsonConfig::getConfig('sources->db');
 
+        $sourceLogin = JsonConfig::getConfig('sources->db->source_login');
+        $sourcePassword = JsonConfig::getConfig('sources->db->source_password');
+        if (!$sourceLogin || !$sourcePassword) {
+            $output->writeln('<comment>Login/password are not set in your .env-project.json. You can specify it at path "sources->db->source_login" and "sources->db->source_password" if you need</comment>');
+            $output->writeln('<comment>Please input credentials for current operation.</comment>');
+            if (!$sourceLogin) {
+                $sourceLogin = $io->ask("Your login for $source", '');
+                $downloadOptions['source_login'] = $sourceLogin;
+            }
+            if(!$sourcePassword) {
+                $sourcePassword = $io->ask("Your password for $source", '');
+                $downloadOptions['source_password'] = $sourcePassword;
+            }
+        }
+
         $coreHost = EnvConfig::getValue('WEBSITE_HOST_NAME');
         $projectName = EnvConfig::getValue('PROJECT_NAME');
 
