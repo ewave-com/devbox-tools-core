@@ -41,7 +41,7 @@ class CoreSetupNodeModules extends CommandAbstract
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $destinationPath = EnvConfig::getValue('WEBSITE_APPLICATION_ROOT') ?: EnvConfig::getValue('WEBSITE_DOCUMENT_ROOT');
+        $destinationPath = EnvConfig::getValue('WEBSITE_NODE_MODULES_ROOT') ?: EnvConfig::getValue('WEBSITE_DOCUMENT_ROOT');
         $io = new SymfonyStyle($input, $output);
 
         $packageManager = JsonConfig::getConfig(
