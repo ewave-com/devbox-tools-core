@@ -110,6 +110,16 @@ class CoreSetupCode extends CommandAbstract
 
         $rComposer = $io->confirm('Run "composer install?"', false);
         if ($rComposer) {
+            $applicationDir = EnvConfig::getValue('WEBSITE_APPLICATION_ROOT') ?: EnvConfig::getValue('WEBSITE_DOCUMENT_ROOT');
+            if (file_exists($applicationDir . '/composer.lock')) {
+                $checkIsV1Command = "composer --version --no-plugins | grep 'Composer version 1.'";
+                $checkHasDependencyToV1Command = "grep -m 1 -E '\"composer-plugin-api\"\:\ \"[^~]?1\..*\"' \"${applicationDir}/composer.lock\"";
+                if (!exec($checkIsV1Command) && exec($checkHasDependencyToV1Command)) {
+                    $output->writeln('<info>Downgrading composer to V 1 to match composer.lock dependencies</info>');
+                    $this->executeCommands(["sudo composer self-update --1 > /dev/null 2>&1"], $output);
+                }
+            }
+
             $this->executeCommands("cd $destinationPath && composer install", $output);
         }
 
