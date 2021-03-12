@@ -146,6 +146,7 @@ class CoreSetupDb extends CommandAbstract
             $fileFullPath = $source;
         }
 
+        $output->writeln('<info>Extracting gzipped database ...</info>');
         try {
             $newDumpPath = $this->unGz($fileFullPath, $output);
             if (!is_file($newDumpPath)) {
@@ -156,7 +157,7 @@ class CoreSetupDb extends CommandAbstract
             return false;
         }
 
-        $output->writeln('<info>Extracting Database ...</info>');
+        $output->writeln('<info>Importing Database dump...</info>');
         try {
             $this->executeCommands(
                 "mysql -u$dbUser -p$dbPassword -h$mysqlHost $dbName < $newDumpPath",
