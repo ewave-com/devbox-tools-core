@@ -82,9 +82,8 @@ class CoreUpdateDbData extends CommandAbstract
             foreach ($values as $valueData) {
                 try {
                     $query = $this->prepareQuery($dbConnection, $tableName, $valueData);
-                    $output->writeln(sprintf('<info>%s</info>', $query));
-//                    $output->writeln(sprintf('<info>Updating DB Record. Query: "%s"</info>', $query));
-//                    $dbConnection->exec($query);
+                    $output->writeln(sprintf('<info>Updating DB Record. Query: "%s"</info>', $query));
+                    $dbConnection->exec($query);
                 } catch (\Exception $e) {
                     $io->note($e->getMessage());
                     $io->note('Record updating skipped.');
