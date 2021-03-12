@@ -31,7 +31,7 @@ class Core extends AbstractOptions
             ],
             static::SOURCES_SECONDARY_REUSE => [
                 'boolean' => true,
-                'description' => 'Whether to use existing sources.',
+                'description' => 'Whether to use existing secondary source repository.',
                 'question' => 'Do you want to update source code from the secondary repository? %default%',
                 'default' => true
             ],
