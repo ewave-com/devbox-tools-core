@@ -64,6 +64,7 @@ class CoreSetupDb extends CommandAbstract
         $sourceType = JsonConfig::getConfig('sources->db->source_type');
         $source = JsonConfig::getConfig('sources->db->source_path');
         $localDumpsStorage = JsonConfig::getConfig('sources->db->local_temp_path');
+        $importGzippedSqlDirectly = JsonConfig::getConfig('sources->db->import_gzipped_sql_directly', true);
         $downloadOptions = JsonConfig::getConfig('sources->db');
 
         $sourceLogin = JsonConfig::getConfig('sources->db->source_login');
@@ -145,26 +146,53 @@ class CoreSetupDb extends CommandAbstract
         } else {
             $fileFullPath = $source;
         }
-
-        $output->writeln('<info>Extracting gzipped database ...</info>');
+        
         try {
-            $newDumpPath = $this->unGz($fileFullPath, $output);
-            if (!is_file($newDumpPath)) {
-                throw new \Exception('File is not exists. Path: ' . $newDumpPath);
+            if (!$importGzippedSqlDirectly) {
+                $output->writeln('<info>Extracting gzipped database ...</info>');
+                    $newDumpPath = $this->unGz($fileFullPath, $output);
+                    if (!is_file($newDumpPath)) {
+                        throw new \Exception('File is not exists. Path: ' . $newDumpPath);
+                    }
+    
+                    $output->writeln('<info>Importing Database dump...</info>');
+                    $this->executeCommands(
+                        "mysql -u$dbUser -p$dbPassword -h$mysqlHost $dbName < $newDumpPath",
+                        $output
+                    );
+            } else {
+                $output->writeln('<info>Importing Database dump...</info>');
+                if ($this->commandExist('pv')) {
+                    //import with progress bar if possible
+                    if($this->isGzip($fileFullPath)) {
+                        $this->executeCommands(
+                            "pv $fileFullPath | gunzip | mysql -u$dbUser -p$dbPassword -h$mysqlHost $dbName",
+                            $output
+                        );
+                    } else {
+                        $this->executeCommands(
+                            "pv $fileFullPath | mysql -u$dbUser -p$dbPassword -h$mysqlHost $dbName",
+                            $output
+                        );
+                    }
+                } else {
+                    //import "on fly", without storing the dump file separately
+                    if ($this->isGzip($fileFullPath)) {
+                        $this->executeCommands(
+                            "gunzip --stdout $fileFullPath | mysql -u$dbUser -p$dbPassword -h$mysqlHost $dbName",
+                            $output
+                        );
+                    } else {
+                        $this->executeCommands(
+                            "mysql -u$dbUser -p$dbPassword -h$mysqlHost $dbName < $fileFullPath",
+                            $output
+                        );
+                    }
+                }
             }
         } catch (\Exception $e) {
             $io->note($e->getMessage());
-            return false;
-        }
-
-        $output->writeln('<info>Importing Database dump...</info>');
-        try {
-            $this->executeCommands(
-                "mysql -u$dbUser -p$dbPassword -h$mysqlHost $dbName < $newDumpPath",
-                $output
-            );
-        } catch (\Exception $e) {
-            $io->note($e->getMessage());
+            $io->warning('Some issues appeared during DB importing.');
             return false;
         }
 

@@ -71,7 +71,7 @@ class JsonConfig
                     $result = $array[$key];
                     return $result;
                 } else {
-                    $result = self::getInDeep($array[$key], $parts, $index);
+                    $result = self::getInDeep($array[$key], $parts, $index, $default);
                     return $result;
                 }
             } else {

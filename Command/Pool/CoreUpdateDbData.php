@@ -57,7 +57,7 @@ class CoreUpdateDbData extends CommandAbstract
         $this->commandTitle($io, 'Update Data in DB');
         $tablesData = JsonConfig::getConfig('sources->update_db_data');
         if (!$tablesData) {
-            $io->note('Updated database values are not configured in .env-projects.json in section "sources->update_db_data". Step skipped.');
+            $io->note('Updatable database values are not configured in .env-projects.json in section "sources->update_db_data". Step skipped.');
 
             return true;
         }
