@@ -91,7 +91,7 @@ class Db extends AbstractOptions
             static::UPDATE_DB_DATA => [
                 'boolean' => true,
                 'description' => 'Do you want to update Database records?',
-                'question' => 'Do you want to update DB values according to config? %default%',
+                'question' => 'Do you want to update DB values according to config section "sources->update_db_data"? %default%',
                 'default' => 'yes'
             ]
         ];
