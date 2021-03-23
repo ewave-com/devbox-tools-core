@@ -173,7 +173,7 @@ class CoreUpdateDbData extends CommandAbstract
         $columnName = current(array_keys($setData));
         $value = current(array_values($setData));
 
-        $setValueSql = sprintf('`%s` = %s', $columnName, $value);
+        $setValueSql = sprintf('`%s` = \'%s\'', $columnName, $value);
 
         return $setValueSql;
     }
