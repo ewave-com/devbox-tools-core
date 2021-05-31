@@ -46,6 +46,7 @@ class CoreSetupPermission extends CommandAbstract
                 $command1 = "sudo chown -R www-data:www-data " . $source . '/*';
                 $command2 = "chmod -R 777 " . $source . '/*';
                 $command3 = sprintf('if [ -d %s/.ssh ]; then sudo chmod -R 600 %s/.ssh/*; fi', $source, $source);
+                $command4 = "sudo chmod -R 777 /tmp/*";
 
                 $this->executeCommands(
                     [$command1, $command2, $command3],
