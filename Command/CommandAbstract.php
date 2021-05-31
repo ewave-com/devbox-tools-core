@@ -179,6 +179,17 @@ abstract class CommandAbstract extends CoreCommandAbstract
 
     /**
      * @param string $filePath
+     * @param null $output
+     *
+     * @return bool
+     */
+    public function isGzip($filePath)
+    {
+        return 'gz' === pathinfo($filePath, PATHINFO_EXTENSION);
+    }
+
+    /**
+     * @param string $filePath
      * @param OutputInterface $output
      * @return string
      */

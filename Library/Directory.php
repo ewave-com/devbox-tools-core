@@ -17,6 +17,19 @@ class Directory
      */
     public static function isEmptyDir($dir)
     {
+        $dir = trim($dir, '/');
         return !count(glob("/$dir/*"));
+    }
+
+    /**
+     * Define whether dir is empty
+     *
+     * @param $dir
+     * @return bool
+     */
+    public static function isDir($path)
+    {
+        $path = trim($path, '/');
+        return is_dir("/$path");
     }
 }

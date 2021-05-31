@@ -19,7 +19,7 @@ class JsonConfigPatterns
     protected static function getPatterns()
     {
         return [
-            '[~website_root]' => EnvConfig::getValue('WEBSITE_DOCUMENT_ROOT'),
+            '[~website_root]' => EnvConfig::getValue('WEBSITE_APPLICATION_ROOT') ?: EnvConfig::getValue('WEBSITE_DOCUMENT_ROOT'),
             '[~temp_storage]' => JsonConfig::getConfig('base_params->temp_storage->base', false, false)
         ];
     }
