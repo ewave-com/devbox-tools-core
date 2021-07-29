@@ -23,9 +23,9 @@ class Ftp implements DownloaderInterface
         }
 
         $host = $options['source_host'];
-        $port = $options['source_port'] ?? self::DEFAULT_PORT;
-        $login = $options['source_login'] ?? 'anonymous';
-        $password = $options['source_password'] ?? '';
+        $port = isset($options['source_port']) ? $options['source_port']: self::DEFAULT_PORT;
+        $login = isset($options['source_login']) ? $options['source_login']: 'anonymous';
+        $password = isset($options['source_password']) ? $options['source_password'] : '';
         $sourcePath = ltrim($sourcePath, '/');
         $loginPath = "$login:$password@";
 
