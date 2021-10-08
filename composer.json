@@ -2,7 +2,7 @@
     "name": "ewave/devbox-core-scripts",
     "description": "Core Scripts to help setup and install web application into developer's containers",
     "type": "library",
-    "version": "1.0.0",
+    "version": "2.1.0",
     "require": {
         "symfony/console": "^3.1",
         "symfony/config": "^3.4",
