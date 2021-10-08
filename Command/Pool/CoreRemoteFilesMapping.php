@@ -85,6 +85,21 @@ class CoreRemoteFilesMapping extends CommandAbstract
             return false;
         }
 
+        $sourceLogin = JsonConfig::getConfig('sources->files_mapping->creds->source_login');
+        $sourcePassword = JsonConfig::getConfig('sources->files_mapping->creds->source_password');
+        if (!$sourceLogin || !$sourcePassword) {
+            $output->writeln('<comment>Login/password are not set in your .env-project.json. You can specify it at path "sources->files_mapping->creds->source_login" and "sources->files_mapping->creds->source_password" if you need</comment>');
+            $output->writeln('<comment>Please input credentials for current operation.</comment>');
+            if (!$sourceLogin) {
+                $sourceLogin = $io->ask("Your login for $sourcePath", '');
+                $downloadOptions['source_login'] = $sourceLogin;
+            }
+            if(!$sourcePassword) {
+                $sourcePassword = $io->ask("Your password for $sourcePath", '');
+                $downloadOptions['source_password'] = $sourcePassword;
+            }
+        }
+
         $headers = ['Remote File', 'Local file'];
         $rows = [];
         foreach ($mapping as $s => $l) {
@@ -97,6 +112,7 @@ class CoreRemoteFilesMapping extends CommandAbstract
 
         /** @var DownloaderFactory $downloaderFactory */
         $downloaderFactory = Container::getContainer()->get(DownloaderFactory::class);
+        $applicationRoot = EnvConfig::getValue('WEBSITE_SOURCES_ROOT') ?: EnvConfig::getValue('WEBSITE_DOCUMENT_ROOT');
 
         try {
             $downloader = $downloaderFactory->get($sourceType);
@@ -117,8 +133,16 @@ class CoreRemoteFilesMapping extends CommandAbstract
 
         foreach ($mapping as $sourceFile => $localFile) {
             $sourceTempFile = $destinationPath . DIRECTORY_SEPARATOR . $sourceFile;
-            $command = "cp $sourceTempFile $localFile";
+            if ('/' !== substr($localFile, 0, 1)) {
+                $localFile = $applicationRoot . '/' . $localFile; // transform to absolute path
+            }
+
+            if (!is_dir(dirname($localFile))) {
+                $this->mkdir(dirname($localFile), $output);
+            }
+
             $output->writeln('Copying file ' . $sourceTempFile . ' to ' . $localFile);
+            $command = "cp $sourceTempFile $localFile";
 
             try {
                 $this->executeCommands(

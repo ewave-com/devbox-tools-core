@@ -38,10 +38,10 @@ class Vcs implements DownloaderInterface
         }
 
         $defaultBranch = $options['source_branch'];
-        if (!Directory::isEmptyDir($destinationPath)) {
+        if (Directory::isDir($destinationPath . '/.git')) {
             if (null !== $output) {
                 $output->writeln([
-                    "<comment>Destination is not empty: $destinationPath</comment>",
+                    "<comment>Detected .git directory at destination path: $destinationPath</comment>",
                     "<comment>Cloning step will be skipped</comment>",
                     "<info>Trying to pull... </info>",
                 ]);

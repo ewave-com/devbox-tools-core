@@ -55,7 +55,12 @@ class CoreUpdateDbData extends CommandAbstract
     {
         $io = new SymfonyStyle($input, $output);
         $this->commandTitle($io, 'Update Data in DB');
+        $tablesData = JsonConfig::getConfig('sources->update_db_data');
+        if (!$tablesData) {
+            $io->note('Updatable database values are not configured in .env-projects.json in section "sources->update_db_data". Step skipped.');
 
+            return true;
+        }
         $updateAgr = $this->requestOption(DbOptions::UPDATE_DB_DATA, $input, $output, true);
         if (!$updateAgr) {
             $output->writeln('<comment>Urls updating skipped</comment>');
@@ -66,7 +71,6 @@ class CoreUpdateDbData extends CommandAbstract
         $dbConnection = $this->getDbConnection($input, $output, $io);
 
         $tablesData = JsonConfig::getConfig('sources->update_db_data');
-
         if (!$tablesData) {
             $io->note('Updated database values are not set in .env-projects.json.');
 
@@ -146,7 +150,7 @@ class CoreUpdateDbData extends CommandAbstract
 
         $whereConditions = [];
         foreach ($whereData as $columnName => $value) {
-            if (false == strpos($value, '%')) {
+            if (false === strpos($value, '%')) {
                 $whereConditions[] = sprintf('`%s` = %s', $columnName, $dbConnection->quote($value));
             } else {
                 $whereConditions[] = sprintf('`%s` LIKE %s', $columnName, $dbConnection->quote($value));
@@ -169,7 +173,7 @@ class CoreUpdateDbData extends CommandAbstract
         $columnName = current(array_keys($setData));
         $value = current(array_values($setData));
 
-        $setValueSql = sprintf('`%s` = %s', $columnName, $dbConnection->quote($value));
+        $setValueSql = sprintf('`%s` = \'%s\'', $columnName, $value);
 
         return $setValueSql;
     }

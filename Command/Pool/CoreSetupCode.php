@@ -52,10 +52,19 @@ class CoreSetupCode extends CommandAbstract
         if ($useExistingSources) {
             $this->executeRepeatedly('copyFromGit', $input, $output, $io);
         } else {
-            $output->writeln('<comment>Step skipped.</comment>');
+            $output->writeln('<comment>Source code downloading step skipped.</comment>');
         }
 
         Registry::set(CoreOptions::SOURCES_REUSE, $useExistingSources);
+
+        if (JsonConfig::getConfig('sources->code_secondary')) {
+            $useExistingSecondarySources = $this->requestOption(CoreOptions::SOURCES_SECONDARY_REUSE, $input, $output, true);
+            if ($useExistingSecondarySources) {
+                $this->executeRepeatedly('copyFromSecondaryGit', $input, $output, $io);
+            } else {
+                $output->writeln('<comment>Secondary repository source code downloading step skipped.</comment>');
+            }
+        }
     }
 
     /**
@@ -66,7 +75,7 @@ class CoreSetupCode extends CommandAbstract
      */
     protected function copyFromGit(InputInterface $input, OutputInterface $output, SymfonyStyle $io)
     {
-        $destinationPath = EnvConfig::getValue('WEBSITE_DOCUMENT_ROOT');
+        $destinationPath = EnvConfig::getValue('WEBSITE_SOURCES_ROOT') ?: EnvConfig::getValue('WEBSITE_DOCUMENT_ROOT');
         $sourceType = JsonConfig::getConfig('sources->code->source_type');
         $sourcePath = JsonConfig::getConfig('sources->code->source_path');
         $defaultBranch = JsonConfig::getConfig('sources->code->source_branch');
@@ -101,7 +110,61 @@ class CoreSetupCode extends CommandAbstract
 
         $rComposer = $io->confirm('Run "composer install?"', false);
         if ($rComposer) {
+            $applicationDir = EnvConfig::getValue('WEBSITE_APPLICATION_ROOT') ?: EnvConfig::getValue('WEBSITE_DOCUMENT_ROOT');
+            if (file_exists($applicationDir . '/composer.lock')) {
+                $checkIsV1Command = "composer --version --no-plugins | grep 'Composer version 1.'";
+                $checkHasDependencyToV1Command = "grep -m 1 -E '\"composer-plugin-api\"\:\ \"[^~]?1\.[0-9.]+\"' \"${applicationDir}/composer.lock\"";
+                if (!exec($checkIsV1Command) && exec($checkHasDependencyToV1Command)) {
+                    $output->writeln('<info>Downgrading composer to V 1 to match composer.lock dependencies</info>');
+                    $this->executeCommands(["sudo composer self-update --1 > /dev/null 2>&1"], $output);
+                }
+            }
+
             $this->executeCommands("cd $destinationPath && composer install", $output);
+        }
+
+        return true;
+    }
+
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @param $io
+     * @return bool
+     */
+    protected function copyFromSecondaryGit(InputInterface $input, OutputInterface $output, SymfonyStyle $io)
+    {
+        $sourceType = JsonConfig::getConfig('sources->code_secondary->source_type');
+        $sourcePath = JsonConfig::getConfig('sources->code_secondary->source_path');
+        $destinationPath = JsonConfig::getConfig('sources->code_secondary->destination_website_path');
+        $defaultBranch = JsonConfig::getConfig('sources->code_secondary->source_branch');
+        $downloadOptions = JsonConfig::getConfig('sources->code_secondary');
+
+        $output->writeln('<info>[Secondary Download Params]</info>');
+        $headers = ['Parameter', 'Value'];
+        $rows = [
+            ['Remote Url', $sourcePath],
+            ['Branch', $defaultBranch],
+            ['Destination', $destinationPath],
+        ];
+        $io->table($headers, $rows);
+
+        $this->executeCommands(
+            ["mkdir -p " . $destinationPath],
+            $output
+        );
+
+        /** @var DownloaderFactory $downloaderFactory */
+        $downloaderFactory = Container::getContainer()->get(DownloaderFactory::class);
+
+        try {
+            $downloader = $downloaderFactory->get($sourceType);
+            $downloader->download($sourcePath, $destinationPath, $downloadOptions, $output);
+            $io->success('Download completed');
+        } catch (\Exception $e) {
+            $io->warning([$e->getMessage()]);
+            $io->warning('Some issues appeared during source code update');
+            return false;
         }
 
         return true;
@@ -113,7 +176,8 @@ class CoreSetupCode extends CommandAbstract
     public function getOptionsConfig()
     {
         return [
-            CoreOptions::SOURCES_REUSE => CoreOptions::get(CoreOptions::SOURCES_REUSE)
+            CoreOptions::SOURCES_REUSE => CoreOptions::get(CoreOptions::SOURCES_REUSE),
+            CoreOptions::SOURCES_SECONDARY_REUSE => CoreOptions::get(CoreOptions::SOURCES_SECONDARY_REUSE)
         ];
     }
 }

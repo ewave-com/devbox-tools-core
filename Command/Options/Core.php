@@ -13,6 +13,7 @@ namespace CoreDevBoxScripts\Command\Options;
 class Core extends AbstractOptions
 {
     const SOURCES_REUSE = 'core-sources-reuse';
+    const SOURCES_SECONDARY_REUSE = 'core-secondary-sources-reuse';
     const MEDIA_CLEAR_TEMP_LOCAL = 'core-clear-tempt-storage';
     const MEDIA_DOWNLOAD = 'core-media-reuse';
 
@@ -26,13 +27,19 @@ class Core extends AbstractOptions
                 'boolean' => true,
                 'description' => 'Whether to use existing sources.',
                 'question' => 'Do you want to update source code? %default%',
-                'default' => 'yes'
+                'default' => true
+            ],
+            static::SOURCES_SECONDARY_REUSE => [
+                'boolean' => true,
+                'description' => 'Whether to use existing secondary source repository.',
+                'question' => 'Do you want to update source code from the secondary repository? %default%',
+                'default' => true
             ],
             static::MEDIA_DOWNLOAD => [
                 'boolean' => true,
                 'description' => 'Whether to use existing Media files.',
                 'question' => 'Do you want to update media files? %default%',
-                'default' => 'yes'
+                'default' => true
             ],
             static::MEDIA_CLEAR_TEMP_LOCAL => [
                 'boolean' => true,

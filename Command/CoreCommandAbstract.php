@@ -48,9 +48,11 @@ abstract class CoreCommandAbstract extends Command
     /**#@-*/
 
     /**#@+
-     * Value matchers
+     * Value matchers,
+     * also supported cyrillic "н" (the same keyboard button as latin "y")
+     * also ignore first byte after multibyte deletions [\x{00}-\x{1F}\x{7F}-\x{FF}]
      */
-    const MATCHER_BOOLEAN_TRUE = '~^(?:[1y]|yes|true)$~i';
+    const MATCHER_BOOLEAN_TRUE = '/^[\x{00}-\x{1F}\x{7F}-\x{FF}]*(?:[1y]|yes|true|н)$/i';
     /**#@-*/
 
     /**#@+
