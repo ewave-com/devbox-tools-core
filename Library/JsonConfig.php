@@ -61,7 +61,7 @@ class JsonConfig
      * @param string $default
      * @return bool|string|array
      */
-    protected function getInDeep($array, $parts, $index, $default = '')
+    protected static function getInDeep($array, $parts, $index, $default = '')
     {
         if (isset($parts[$index])) {
             $key = $parts[$index];
