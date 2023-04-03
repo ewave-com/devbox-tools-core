@@ -160,8 +160,9 @@ abstract class CommandAbstract extends CoreCommandAbstract
     {
         $path_parts = pathinfo($filePath);
         $newPath = $filePath;
+        $fileExtension = isset($path_parts['extension']) ? $path_parts['extension'] : '';
 
-        if ($path_parts['extension'] == 'gz') {
+        if ($fileExtension == 'gz') {
             $command = "gunzip " . $filePath;
             $output->writeln('<comment>[GZ] Unpacking file...</comment>');
             $this->executeCommands(
@@ -197,8 +198,9 @@ abstract class CommandAbstract extends CoreCommandAbstract
     {
         $path_parts = pathinfo($filePath);
         $newPath = $filePath;
+        $fileExtension = isset($path_parts['extension']) ? $path_parts['extension'] : '';
 
-        if ($path_parts['extension'] == 'tar') {
+        if ($fileExtension == 'tar') {
 
             $extractedPath = $path_parts['dirname'] . DIRECTORY_SEPARATOR . 'extracted';
 
