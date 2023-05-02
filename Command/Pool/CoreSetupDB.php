@@ -157,7 +157,7 @@ class CoreSetupDb extends CommandAbstract
     
                     $output->writeln('<info>Importing Database dump...</info>');
                     $this->executeCommands(
-                        "mysql -u$dbUser -p$dbPassword -h$mysqlHost $dbName < $newDumpPath",
+                        "mysql -f -u$dbUser -p$dbPassword -h$mysqlHost $dbName < $newDumpPath",
                         $output
                     );
             } else {
@@ -166,12 +166,12 @@ class CoreSetupDb extends CommandAbstract
                     //import with progress bar if possible
                     if($this->isGzip($fileFullPath)) {
                         $this->executeCommands(
-                            "pv $fileFullPath | gunzip | mysql -u$dbUser -p$dbPassword -h$mysqlHost $dbName",
+                            "pv $fileFullPath | gunzip | mysql -f -u$dbUser -p$dbPassword -h$mysqlHost $dbName",
                             $output
                         );
                     } else {
                         $this->executeCommands(
-                            "pv $fileFullPath | mysql -u$dbUser -p$dbPassword -h$mysqlHost $dbName",
+                            "pv $fileFullPath | mysql -f -u$dbUser -p$dbPassword -h$mysqlHost $dbName",
                             $output
                         );
                     }
@@ -179,12 +179,12 @@ class CoreSetupDb extends CommandAbstract
                     //import "on fly", without storing the dump file separately
                     if ($this->isGzip($fileFullPath)) {
                         $this->executeCommands(
-                            "gunzip --stdout $fileFullPath | mysql -u$dbUser -p$dbPassword -h$mysqlHost $dbName",
+                            "gunzip --stdout $fileFullPath | mysql -f -u$dbUser -p$dbPassword -h$mysqlHost $dbName",
                             $output
                         );
                     } else {
                         $this->executeCommands(
-                            "mysql -u$dbUser -p$dbPassword -h$mysqlHost $dbName < $fileFullPath",
+                            "mysql -f -u$dbUser -p$dbPassword -h$mysqlHost $dbName < $fileFullPath",
                             $output
                         );
                     }
